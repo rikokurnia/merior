@@ -2,8 +2,108 @@
 
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { ArrowDown, Mail } from "lucide-react";
+import { ArrowDown, Mail, Wallet, ArrowRight, Shield, X, RefreshCw } from "lucide-react";
 import Grainient from "@/components/Grainient";
+
+// Wallet SVG Logos
+const MetaMaskLogo = () => (
+  <svg className="w-6 h-6" viewBox="0 0 318.6 288.6" fill="none">
+    <path d="M286.6 19.3L159.3 90 32 19.3l15.9 83.4L159.3 140l111.4-37.3z" fill="#E17726"/>
+    <path d="M159.3 140L47.9 102.7 159.3 90z" fill="#E27625"/>
+    <path d="M159.3 140l111.4-37.3L159.3 90z" fill="#E27625"/>
+    <path d="M159.3 270l105.7-48.6 21.6-96.6H170.8z" fill="#E27625"/>
+    <path d="M159.3 270L53.6 221.4 32 124.8h112.5z" fill="#E27625"/>
+    <path d="M170.8 124.8l105.7 14.8-17.2 81.8z" fill="#E27625"/>
+    <path d="M147.8 124.8L42.1 139.6l17.2 81.8z" fill="#E27625"/>
+    <path d="M159.3 140l11.5-15.2h-23z" fill="#D7C1B1"/>
+    <path d="M159.3 270v-48.6l-11.5 8.1z" fill="#D7C1B1"/>
+    <path d="M159.3 270v-48.6l11.5 8.1z" fill="#D7C1B1"/>
+    <path d="M159.3 221.4l-11.5-8.1h23z" fill="#F2A365"/>
+    <path d="M170.8 124.8h105.7l10.1-41.4-65-38.3z" fill="#F2A365"/>
+    <path d="M147.8 124.8H42.1l-10.1-41.4 65-38.3z" fill="#F2A365"/>
+    <path d="M266.5 221.4l10.1-81.8-105.8-14.8z" fill="#E27625"/>
+    <path d="M52.1 221.4l-10.1-81.8 105.8-14.8z" fill="#E27625"/>
+    <path d="M159.3 213.3l107.2 8.1 10.1-96.6-105.8 14.8z" fill="#E27625"/>
+    <path d="M159.3 213.3L52.1 221.4l10.1-96.6 105.8 14.8z" fill="#E27625"/>
+    <path d="M159.3 90L47.9 102.7 42.1 43.4 97 45.1z" fill="#E27625"/>
+    <path d="M159.3 90l111.4 12.7 5.8-59.3-54.9 1.7z" fill="#E27625"/>
+    <path d="M212.8 45.1l53.7-41.4-5.8 59.3z" fill="#E27625"/>
+    <path d="M105.8 45.1L52.1 3.7l5.8 59.3z" fill="#E27625"/>
+  </svg>
+);
+
+const CoinbaseLogo = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill="#0052FF" />
+    <circle cx="12" cy="12" r="4.5" fill="white" />
+  </svg>
+);
+
+const TrustWalletLogo = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <path d="M12 2L4 5v6c0 5.5 3.5 10 8 11 4.5-1 8-5.5 8-11V5l-8-3z" fill="#0500FF" />
+    <path d="M12 5.5L7 7.5v4c0 3.5 2 6.5 5 7.5 3-1 5-4 5-7.5v-4l-5-2z" fill="white" />
+  </svg>
+);
+
+const RainbowLogo = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill="url(#rainbowGrad)" />
+    <defs>
+      <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FF007A" />
+        <stop offset="50%" stopColor="#FFD600" />
+        <stop offset="100%" stopColor="#00F0FF" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+const PhantomLogo = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.12.04.24-.05.24-.17v-1.63c0-.66.38-1.26.97-1.53l1.19-.54c.5-.23.82-.73.82-1.28v-.54c0-.28-.22-.5-.5-.5h-1.09c-.83 0-1.5-.67-1.5-1.5v-1c0-.83.67-1.5 1.5-1.5h2.09c.83 0 1.5.67 1.5 1.5v1c0 .83-.67 1.5-1.5 1.5h-1.09c-.28 0-.5.22-.5.5v.54c0 .55.32 1.05.82 1.28l1.19.54c.59.27.97.87.97 1.53v1.63c0 .12.12.21.24.17C19.13 20.17 22 16.42 22 12c0-5.52-4.48-10-10-10z" fill="#4E44E7" />
+    <circle cx="9.5" cy="10.5" r="1.5" fill="white" />
+    <circle cx="14.5" cy="10.5" r="1.5" fill="white" />
+    <circle cx="9.5" cy="10.5" r="0.5" fill="black" />
+    <circle cx="14.5" cy="10.5" r="0.5" fill="black" />
+  </svg>
+);
+
+const RabbyLogo = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" fill="#3B7DFF" />
+    <path d="M8 8c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2h-4c-1.1 0-2-.9-2-2V8z" fill="white" />
+    <circle cx="10.5" cy="10" r="1" fill="#3B7DFF" />
+    <circle cx="13.5" cy="10" r="1" fill="#3B7DFF" />
+  </svg>
+);
+
+const GenericWalletLogo = () => (
+  <svg className="w-6 h-6 text-[#BCD3E9]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
+    <line x1="16" y1="12" x2="16.01" y2="12" strokeLinecap="round" />
+    <path d="M3 10h18" />
+  </svg>
+);
+
+const getWalletLogo = (id: string) => {
+  switch (id) {
+    case "metamask":
+      return <MetaMaskLogo />;
+    case "coinbase":
+      return <CoinbaseLogo />;
+    case "trust":
+      return <TrustWalletLogo />;
+    case "rainbow":
+      return <RainbowLogo />;
+    case "phantom":
+      return <PhantomLogo />;
+    case "rabby":
+      return <RabbyLogo />;
+    default:
+      return <GenericWalletLogo />;
+  }
+};
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -11,6 +111,124 @@ export default function LandingPage() {
   const [navTheme, setNavTheme] = useState<"light" | "dark">("light");
   const [activeIntroSlide, setActiveIntroSlide] = useState(0);
   const [activeService, setActiveService] = useState(0);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalStep, setModalStep] = useState<"select" | "email" | "otp" | "connecting">("select");
+  const [emailInput, setEmailInput] = useState("");
+  const [otpInput, setOtpInput] = useState(["", "", "", "", "", ""]);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [detectedWallets, setDetectedWallets] = useState<{ id: string; name: string; icon: string; desc: string }[]>([]);
+
+  useEffect(() => {
+    const conn = localStorage.getItem("wallet_connected");
+    if (conn === "true") {
+      setIsConnected(true);
+      window.location.href = "/queue";
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const wallets: { id: string; name: string; icon: string; desc: string }[] = [];
+      const eth = (window as any).ethereum;
+      
+      const checkProvider = (p: any) => {
+        if (p.isMetaMask && !wallets.some(w => w.id === "metamask")) {
+          wallets.push({ id: "metamask", name: "MetaMask", icon: "🦊", desc: "MetaMask browser extension" });
+        }
+        if (p.isCoinbaseWallet && !wallets.some(w => w.id === "coinbase")) {
+          wallets.push({ id: "coinbase", name: "Coinbase Wallet", icon: "🛡️", desc: "Coinbase browser extension" });
+        }
+        if (p.isTrust && !wallets.some(w => w.id === "trust")) {
+          wallets.push({ id: "trust", name: "Trust Wallet", icon: "🛡️", desc: "Trust browser extension" });
+        }
+        if (p.isRainbow && !wallets.some(w => w.id === "rainbow")) {
+          wallets.push({ id: "rainbow", name: "Rainbow", icon: "🌈", desc: "Rainbow browser extension" });
+        }
+        if (p.isRabby && !wallets.some(w => w.id === "rabby")) {
+          wallets.push({ id: "rabby", name: "Rabby Wallet", icon: "🐰", desc: "Rabby browser extension" });
+        }
+      };
+
+      if (eth) {
+        if (eth.providers && Array.isArray(eth.providers)) {
+          eth.providers.forEach(checkProvider);
+        } else {
+          checkProvider(eth);
+        }
+
+        if (wallets.length === 0) {
+          wallets.push({ id: "injected", name: "Browser Wallet", icon: "🔌", desc: "Injected Web3 provider" });
+        }
+      }
+      
+      const phantom = (window as any).phantom?.ethereum;
+      if (phantom && phantom.isPhantom && !wallets.some(w => w.id === "phantom")) {
+        wallets.push({ id: "phantom", name: "Phantom", icon: "👻", desc: "Phantom browser extension" });
+      } else if (eth && eth.isPhantom && !wallets.some(w => w.id === "phantom")) {
+        wallets.push({ id: "phantom", name: "Phantom", icon: "👻", desc: "Phantom browser extension" });
+      }
+
+      setDetectedWallets(wallets);
+    }
+  }, []);
+
+  const connectWallet = (type: "smart" | "embedded", address?: string) => {
+    localStorage.setItem("wallet_connected", "true");
+    localStorage.setItem("wallet_type", type);
+    localStorage.setItem("wallet_address", address || (type === "smart" ? "0x4b791Ce943b7B9984b79A63725bF1cCe2fdf1964" : "0x7482A1a12cd04547af575f4573c8caa1e94171a1"));
+    setIsConnected(true);
+    setIsModalOpen(false);
+    window.location.href = "/queue";
+  };
+
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailInput) return;
+    setModalStep("otp");
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (isNaN(Number(value))) return;
+    const newOtp = [...otpInput];
+    newOtp[index] = value.substring(value.length - 1);
+    setOtpInput(newOtp);
+
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      nextInput?.focus();
+    }
+
+    if (newOtp.every(val => val !== "")) {
+      setIsConnecting(true);
+      setModalStep("connecting");
+      setTimeout(() => {
+        setIsConnecting(false);
+        connectWallet("embedded");
+      }, 1500);
+    }
+  };
+
+  const connectWeb3Wallet = async () => {
+    setIsConnecting(true);
+    setModalStep("connecting");
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    if (typeof window !== "undefined" && (window as any).ethereum) {
+      try {
+        const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
+        if (accounts.length > 0) {
+          connectWallet("smart", accounts[0]);
+          setIsConnecting(false);
+          return;
+        }
+      } catch (error) {
+        console.error("Wallet connection rejected", error);
+      }
+    }
+    connectWallet("smart");
+    setIsConnecting(false);
+  };
 
   useEffect(() => {
     // Nav Theme Observer
@@ -119,7 +337,26 @@ export default function LandingPage() {
             />
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end items-center gap-6">
+          {isConnected ? (
+            <button 
+              onClick={() => window.location.href = "/queue"}
+              className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-sans font-bold border border-current rounded-full px-5 py-2 hover:bg-white/10 transition-all duration-300 cursor-pointer"
+            >
+              <span>Dashboard</span>
+            </button>
+          ) : (
+            <button 
+              onClick={() => {
+                setModalStep("select");
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-sans font-bold border border-current rounded-full px-5 py-2 hover:bg-white/10 transition-all duration-300 cursor-pointer"
+            >
+              <Wallet size={12} />
+              <span>Connect Wallet</span>
+            </button>
+          )}
           <button className="flex items-center gap-3 text-sm uppercase tracking-widest font-sans font-semibold hover:opacity-85 transition-opacity">
             <span>MENU</span>
             <div className="grid grid-cols-2 gap-0.5 w-3.5 h-3.5">
@@ -552,6 +789,270 @@ export default function LandingPage() {
           scrollbar-width: none;
         }
       `}</style>
+
+      {/* Wallet Connection Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 bg-[#07132a]/80 backdrop-blur-md"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md bg-[#0a1b3a] border border-white/10 rounded-3xl p-8 shadow-2xl text-white overflow-hidden"
+            >
+              {/* Decorative Glow */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#BCD3E9]/10 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight">Connect Wallet</h3>
+                  <p className="text-xs text-white/50 mt-1">Select your preferred login method</p>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 hover:bg-white/5 rounded-full transition-colors cursor-pointer"
+                >
+                  <X size={20} className="text-white/60" />
+                </button>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {modalStep === "select" && (
+                  <motion.div
+                    key="step-select"
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <p className="text-[10px] uppercase tracking-widest text-[#BCD3E9]/80 font-bold">Embedded Wallet</p>
+                      
+                      <button
+                        onClick={() => setModalStep("email")}
+                        className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                            <Mail size={18} className="text-[#BCD3E9]" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold">Sign in with Email</p>
+                            <p className="text-[10px] text-white/40">Secure verification code via inbox</p>
+                          </div>
+                        </div>
+                        <ArrowRight size={16} className="text-white/60" />
+                      </button>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <button 
+                          onClick={() => {
+                            setIsConnecting(true);
+                            setModalStep("connecting");
+                            setTimeout(() => {
+                              setIsConnecting(false);
+                              connectWallet("embedded");
+                            }, 1500);
+                          }}
+                          className="flex flex-col items-center justify-center p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer"
+                        >
+                          <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335" />
+                          </svg>
+                          <span className="text-[10px] mt-2 font-semibold">Google</span>
+                        </button>
+
+                        <button 
+                          onClick={() => {
+                            setIsConnecting(true);
+                            setModalStep("connecting");
+                            setTimeout(() => {
+                              setIsConnecting(false);
+                              connectWallet("embedded");
+                            }, 1500);
+                          }}
+                          className="flex flex-col items-center justify-center p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer"
+                        >
+                          <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                          </svg>
+                          <span className="text-[10px] mt-2 font-semibold">Twitter</span>
+                        </button>
+
+                        <button 
+                          onClick={() => {
+                            setIsConnecting(true);
+                            setModalStep("connecting");
+                            setTimeout(() => {
+                              setIsConnecting(false);
+                              connectWallet("embedded");
+                            }, 1500);
+                          }}
+                          className="flex flex-col items-center justify-center p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer"
+                        >
+                          <span className="text-xs font-semibold border border-[#BCD3E9] rounded-md px-1 text-[#BCD3E9]">Passkey</span>
+                          <span className="text-[10px] mt-2 font-semibold font-mono">FaceID</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="h-[1px] bg-white/10 my-4" />
+
+                    <div className="space-y-3">
+                      <p className="text-[10px] uppercase tracking-widest text-[#BCD3E9]/80 font-bold">External Wallets</p>
+
+                      {detectedWallets.length > 0 ? (
+                        detectedWallets.map((wallet) => (
+                          <button
+                            key={wallet.id}
+                            onClick={connectWeb3Wallet}
+                            className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left cursor-pointer"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 p-2">
+                                {getWalletLogo(wallet.id)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold">{wallet.name}</p>
+                                <p className="text-[10px] text-white/40">{wallet.desc} (Detected)</p>
+                              </div>
+                            </div>
+                            <ArrowRight size={16} className="text-white/60" />
+                          </button>
+                        ))
+                      ) : (
+                        <div className="space-y-3">
+                          <p className="text-xs text-white/50 bg-white/5 border border-white/5 p-3.5 rounded-2xl">
+                            No browser wallet extensions detected. Use email/social sign-in above or install MetaMask.
+                          </p>
+                          <button
+                            onClick={() => window.open("https://metamask.io/download/", "_blank")}
+                            className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left cursor-pointer"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 p-2">
+                                {getWalletLogo("metamask")}
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold">Install MetaMask</p>
+                                <p className="text-[10px] text-white/40">Browser extension (Not detected)</p>
+                              </div>
+                            </div>
+                            <ArrowRight size={16} className="text-white/60" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+
+                {modalStep === "email" && (
+                  <motion.div
+                    key="step-email"
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                  >
+                    <form onSubmit={handleEmailSubmit} className="space-y-6">
+                      <div className="space-y-2">
+                        <label className="text-xs uppercase tracking-wider text-white/60">Enter Email Address</label>
+                        <input
+                          required
+                          type="email"
+                          value={emailInput}
+                          onChange={(e) => setEmailInput(e.target.value)}
+                          placeholder="e.g. user@iwcglobal.net"
+                          className="w-full bg-[#0d224a] border border-white/10 rounded-2xl p-4 outline-none text-white focus:border-[#BCD3E9] transition-all placeholder:text-white/30 text-sm animate-none"
+                        />
+                      </div>
+                      
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setModalStep("select")}
+                          className="flex-1 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-sm transition-all cursor-pointer"
+                        >
+                          Back
+                        </button>
+                        <button
+                          type="submit"
+                          className="flex-1 py-3.5 rounded-2xl bg-[#BCD3E9] text-[#112E64] hover:bg-white font-semibold text-sm transition-all cursor-pointer"
+                        >
+                          Send Code
+                        </button>
+                      </div>
+                    </form>
+                  </motion.div>
+                )}
+
+                {modalStep === "otp" && (
+                  <motion.div
+                    key="step-otp"
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="space-y-6 text-center"
+                  >
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold">Verify your Email</h4>
+                      <p className="text-xs text-white/50">Enter the code sent to {emailInput}</p>
+                    </div>
+
+                    <div className="flex justify-center gap-2">
+                      {otpInput.map((digit, idx) => (
+                        <input
+                          key={idx}
+                          id={`otp-${idx}`}
+                          type="text"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleOtpChange(idx, e.target.value)}
+                          className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl text-center text-xl font-bold text-white focus:border-[#BCD3E9] outline-none transition-all"
+                        />
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setModalStep("email")}
+                      className="text-xs text-[#BCD3E9] hover:underline cursor-pointer"
+                    >
+                      Back to Email
+                    </button>
+                  </motion.div>
+                )}
+
+                {modalStep === "connecting" && (
+                  <motion.div
+                    key="step-connecting"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="py-12 flex flex-col items-center justify-center space-y-4"
+                  >
+                    <RefreshCw className="w-8 h-8 text-[#BCD3E9] animate-spin" />
+                    <div className="text-center">
+                      <p className="text-sm font-semibold">Contacting Dynamic Enclave...</p>
+                      <p className="text-xs text-white/40 mt-1">Generating secure embedded wallet keys</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
