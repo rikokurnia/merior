@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Wallet, Mail, ArrowRight, Shield, HeartPulse, 
-  Activity, CheckCircle2, Coins, Lock, RefreshCw, X, AlertTriangle 
+  Activity, CheckCircle2, Coins, Lock, RefreshCw, X, AlertTriangle,
+  ListOrdered, BarChart2, UserCircle
 } from "lucide-react";
 import Grainient from "@/components/Grainient";
 import { executeConfidentialTriage } from "@/lib/chainlink-agent";
@@ -20,6 +21,7 @@ export default function QueuePage() {
   const [emailInput, setEmailInput] = useState("");
   const [otpInput, setOtpInput] = useState(["", "", "", "", "", ""]);
   const [isConnectingWallet, setIsConnectingWallet] = useState(false);
+  const [activeTab, setActiveTab] = useState<"clinic" | "triage" | "analytics" | "identity">("triage");
 
   useEffect(() => {
     const conn = localStorage.getItem("wallet_connected");
@@ -60,9 +62,6 @@ export default function QueuePage() {
     setIsConnectingWallet(true);
     setModalStep("connecting");
     
-    // Simulate smart wallet delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
     if (typeof window !== "undefined" && (window as any).ethereum) {
       try {
         const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
@@ -74,11 +73,13 @@ export default function QueuePage() {
         }
       } catch (error) {
         console.error("Wallet connection rejected", error);
-        // Fallback to mock connection if rejected/error
-        connectMockWallet("smart");
+        setIsConnectingWallet(false);
+        setModalStep("select");
+        return;
       }
     } else {
-      // No browser wallet, fallback to premium mock
+      // Simulate smart wallet delay for demo fallback
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       connectMockWallet("smart");
     }
     setIsConnectingWallet(false);
@@ -291,9 +292,79 @@ export default function QueuePage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 relative z-10">
+      <main className="max-w-[1600px] mx-auto px-4 md:px-8 py-8 flex flex-col lg:flex-row gap-8 relative z-10 min-h-[80vh]">
         
-        {/* LEFT COLUMN: Patient Triage Action / Input */}
+        {/* SIDEBAR */}
+        <aside className="w-full lg:w-72 shrink-0 h-fit sticky top-28 z-20">
+          <div className="glass-panel rounded-3xl p-3 flex flex-col gap-1 shadow-2xl relative overflow-hidden border border-white/5">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#7482C4]/10 to-transparent rounded-bl-full pointer-events-none" />
+            
+            <p className="text-[10px] uppercase tracking-widest text-[#BCD3E9]/50 font-bold px-5 pt-3 pb-3">Dashboard</p>
+            
+            <button 
+              onClick={() => setActiveTab("triage")}
+              className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all text-left ${
+                activeTab === "triage" 
+                  ? "bg-[#BCD3E9]/15 text-[#D5E8F0] shadow-[inset_0_0_0_1px_rgba(188,211,233,0.2)]" 
+                  : "text-white/50 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <HeartPulse size={18} className={activeTab === "triage" ? "text-[#BCD3E9]" : "text-white/40"} />
+              <span className="font-semibold text-sm tracking-wide">My Triage</span>
+            </button>
+
+            <button 
+              onClick={() => setActiveTab("clinic")}
+              className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all text-left ${
+                activeTab === "clinic" 
+                  ? "bg-[#BCD3E9]/15 text-[#D5E8F0] shadow-[inset_0_0_0_1px_rgba(188,211,233,0.2)]" 
+                  : "text-white/50 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <ListOrdered size={18} className={activeTab === "clinic" ? "text-[#BCD3E9]" : "text-white/40"} />
+              <span className="font-semibold text-sm tracking-wide">Live Clinic Queue</span>
+            </button>
+
+            <button 
+              onClick={() => setActiveTab("analytics")}
+              className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all text-left ${
+                activeTab === "analytics" 
+                  ? "bg-[#BCD3E9]/15 text-[#D5E8F0] shadow-[inset_0_0_0_1px_rgba(188,211,233,0.2)]" 
+                  : "text-white/50 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <BarChart2 size={18} className={activeTab === "analytics" ? "text-[#BCD3E9]" : "text-white/40"} />
+              <span className="font-semibold text-sm tracking-wide">Yield Analytics</span>
+            </button>
+
+            <div className="h-[1px] bg-white/5 my-2 mx-4" />
+
+            <button 
+              onClick={() => setActiveTab("identity")}
+              className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all text-left ${
+                activeTab === "identity" 
+                  ? "bg-[#BCD3E9]/15 text-[#D5E8F0] shadow-[inset_0_0_0_1px_rgba(188,211,233,0.2)]" 
+                  : "text-white/50 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <UserCircle size={18} className={activeTab === "identity" ? "text-[#BCD3E9]" : "text-white/40"} />
+              <span className="font-semibold text-sm tracking-wide">Identity & Wallet</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* CONTENT TABS */}
+        <div className="flex-1 min-w-0">
+          <AnimatePresence mode="wait">
+            {activeTab === "triage" && (
+              <motion.div 
+                key="tab-triage"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="max-w-3xl"
+              >
+                {/* LEFT COLUMN: Patient Triage Action / Input */}
         <section className="glass-panel rounded-3xl p-6 md:p-8 flex flex-col justify-between min-h-[70vh] shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#7482C4]/5 to-transparent rounded-bl-full pointer-events-none" />
           
@@ -467,75 +538,122 @@ export default function QueuePage() {
               </motion.div>
             )}
           </AnimatePresence>
-        </section>
+                </section>
+              </motion.div>
+            )}
 
-        {/* RIGHT COLUMN: Live Clinic Queue Dashboard */}
-        <section className="glass-panel rounded-3xl p-6 md:p-8 flex flex-col justify-between shadow-2xl min-h-[70vh]">
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center gap-2">
-                <Activity className="text-emerald-400 w-5 h-5 animate-pulse" />
-                <span className="text-xs uppercase tracking-[0.2em] text-[#BCD3E9]/80 font-semibold">Live Clinic Queue</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
-                <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-mono">Live Sync</span>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {queue.map((patient, index) => (
-                <motion.div
-                  key={patient.id}
-                  layout
-                  className={`border transition-all rounded-2xl p-4 flex items-center justify-between ${
-                    patient.isMe 
-                      ? "bg-[#BCD3E9]/15 border-[#BCD3E9]/30" 
-                      : "bg-white/5 border-white/10 hover:bg-white/10"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-mono font-bold ${
-                      patient.isMe 
-                        ? "bg-[#BCD3E9] text-[#112E64]" 
-                        : "bg-white/5 border border-white/10 text-white/80"
-                    }`}>
-                      #{index + 1}
-                    </div>
-                    <div>
+            {activeTab === "clinic" && (
+              <motion.div 
+                key="tab-clinic"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="max-w-4xl"
+              >
+                {/* RIGHT COLUMN: Live Clinic Queue Dashboard */}
+                <section className="glass-panel rounded-3xl p-6 md:p-8 flex flex-col justify-between shadow-2xl min-h-[70vh]">
+                  <div>
+                    <div className="flex justify-between items-center mb-6">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold">{patient.name}</span>
-                        {patient.isMe && (
-                          <span className="text-[9px] bg-[#BCD3E9]/20 text-[#BCD3E9] font-mono px-2 py-0.5 rounded uppercase tracking-wider font-bold">
-                            You
-                          </span>
-                        )}
+                        <Activity className="text-emerald-400 w-5 h-5 animate-pulse" />
+                        <span className="text-xs uppercase tracking-[0.2em] text-[#BCD3E9]/80 font-semibold">Live Clinic Queue</span>
                       </div>
-                      <div className="flex items-center gap-3 text-[10px] text-white/40 mt-1">
-                        <span>Waiting: {patient.timeWaiting}</span>
-                        <span>•</span>
-                        <span className="text-emerald-400 font-mono">ZK Verified</span>
+                      <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
+                        <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-mono">Live Sync</span>
                       </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {queue.map((patient, index) => (
+                        <motion.div
+                          key={patient.id}
+                          layout
+                          className={`border transition-all rounded-2xl p-4 flex items-center justify-between ${
+                            patient.isMe 
+                              ? "bg-[#BCD3E9]/15 border-[#BCD3E9]/30 scale-[1.02] shadow-lg" 
+                              : "bg-white/5 border-white/10 hover:bg-white/10"
+                          }`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-mono font-bold ${
+                              patient.isMe 
+                                ? "bg-[#BCD3E9] text-[#112E64]" 
+                                : "bg-white/5 border border-white/10 text-white/80"
+                            }`}>
+                              #{index + 1}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg font-semibold">{patient.name}</span>
+                                {patient.isMe && (
+                                  <span className="text-[10px] bg-[#BCD3E9]/20 text-[#BCD3E9] font-mono px-2 py-0.5 rounded uppercase tracking-wider font-bold">
+                                    You
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 text-xs text-white/40 mt-1">
+                                <span>Waiting: {patient.timeWaiting}</span>
+                                <span>•</span>
+                                <span className="text-emerald-400 font-mono">ZK Verified</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <p className="text-[10px] uppercase tracking-wider text-white/40">Priority Score</p>
+                            <p className="text-3xl font-black font-mono text-[#D5E8F0] tracking-tight">{patient.urgency}</p>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <p className="text-[9px] uppercase tracking-wider text-white/40">Priority Score</p>
-                    <p className="text-xl font-bold font-mono text-[#D5E8F0]">{patient.urgency}</p>
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mt-8 flex items-center gap-4">
+                    <div className="p-3 bg-white/5 rounded-xl">
+                      <Lock size={20} className="text-[#BCD3E9]" />
+                    </div>
+                    <p className="text-sm text-white/55 leading-relaxed font-mono">
+                      All queue updates are managed securely by the smart contract. Patient identity keys are mapped to their zk-proof tickets to guarantee privacy.
+                    </p>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+                </section>
+              </motion.div>
+            )}
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mt-8 flex items-center gap-3">
-            <Lock size={16} className="text-[#BCD3E9] shrink-0" />
-            <p className="text-xs text-white/55 leading-relaxed font-mono">
-              All queue updates are managed securely by the smart contract. Patient identity keys are mapped to their zk-proof tickets to guarantee privacy.
-            </p>
-          </div>
-        </section>
+            {activeTab === "analytics" && (
+              <motion.div 
+                key="tab-analytics"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="max-w-3xl glass-panel rounded-3xl p-8 shadow-2xl min-h-[70vh] flex flex-col items-center justify-center text-center"
+              >
+                <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 mb-6">
+                  <BarChart2 className="w-10 h-10 text-[#BCD3E9]" />
+                </div>
+                <h2 className="font-serif text-3xl text-[#D5E8F0] uppercase tracking-wide">Yield Analytics</h2>
+                <p className="text-white/50 mt-4 max-w-md">Detailed breakdown of total USDC earned, system-wide queue efficiency, and top yielding patients will be displayed here.</p>
+              </motion.div>
+            )}
 
+            {activeTab === "identity" && (
+              <motion.div 
+                key="tab-identity"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="max-w-3xl glass-panel rounded-3xl p-8 shadow-2xl min-h-[70vh] flex flex-col items-center justify-center text-center"
+              >
+                <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 mb-6">
+                  <UserCircle className="w-10 h-10 text-[#BCD3E9]" />
+                </div>
+                <h2 className="font-serif text-3xl text-[#D5E8F0] uppercase tracking-wide">Identity & Wallet</h2>
+                <p className="text-white/50 mt-4 max-w-md">Your ZK-Health Identity configuration, paired embedded wallet controls, and on-chain connection settings will live here.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </main>
 
       {/* MODAL: Connect Wallet Dialog */}

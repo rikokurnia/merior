@@ -213,7 +213,7 @@ export default function LandingPage() {
   const connectWeb3Wallet = async () => {
     setIsConnecting(true);
     setModalStep("connecting");
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    
     if (typeof window !== "undefined" && (window as any).ethereum) {
       try {
         const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
@@ -224,10 +224,16 @@ export default function LandingPage() {
         }
       } catch (error) {
         console.error("Wallet connection rejected", error);
+        setIsConnecting(false);
+        setModalStep("select");
+        return;
       }
+    } else {
+      // Fallback for demo purposes if no wallet is installed
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      connectWallet("smart");
+      setIsConnecting(false);
     }
-    connectWallet("smart");
-    setIsConnecting(false);
   };
 
   useEffect(() => {
