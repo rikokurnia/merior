@@ -14,19 +14,26 @@ export const TRIAGE_QUEUE_ABI = [
 
 import { TRIAGE_QUEUE_ADDRESS } from "./contract-config";
 
-export async function getTriageContract() {
-  if (typeof window === "undefined" || !(window as any).ethereum) {
-    throw new Error("No Ethereum provider found");
+export async function getTriageContract(signer?: ethers.Signer) {
+  if (signer) {
+    return new ethers.Contract(TRIAGE_QUEUE_ADDRESS, TRIAGE_QUEUE_ABI, signer);
   }
-  const provider = new ethers.BrowserProvider((window as any).ethereum);
-  const signer = await provider.getSigner();
-  return new ethers.Contract(TRIAGE_QUEUE_ADDRESS, TRIAGE_QUEUE_ABI, signer);
+  // Fallback to window.ethereum if signer not provided directly
+  if (typeof window !== "undefined" && (window as any).ethereum) {
+    const provider = new ethers.BrowserProvider((window as any).ethereum);
+    const fallbackSigner = await provider.getSigner();
+    return new ethers.Contract(TRIAGE_QUEUE_ADDRESS, TRIAGE_QUEUE_ABI, fallbackSigner);
+  }
+  throw new Error("No Ethereum provider or signer found");
 }
 
-export async function getTriageContractReadOnly() {
-  if (typeof window === "undefined" || !(window as any).ethereum) {
-    throw new Error("No Ethereum provider found");
+export async function getTriageContractReadOnly(providerOrClient?: any) {
+  if (providerOrClient) {
+    return new ethers.Contract(TRIAGE_QUEUE_ADDRESS, TRIAGE_QUEUE_ABI, providerOrClient);
   }
-  const provider = new ethers.BrowserProvider((window as any).ethereum);
-  return new ethers.Contract(TRIAGE_QUEUE_ADDRESS, TRIAGE_QUEUE_ABI, provider);
+  if (typeof window !== "undefined" && (window as any).ethereum) {
+    const provider = new ethers.BrowserProvider((window as any).ethereum);
+    return new ethers.Contract(TRIAGE_QUEUE_ADDRESS, TRIAGE_QUEUE_ABI, provider);
+  }
+  throw new Error("No Ethereum provider found");
 }

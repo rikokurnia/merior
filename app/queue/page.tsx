@@ -10,30 +10,15 @@ import {
 import Grainient from "@/components/Grainient";
 import { executeConfidentialTriage } from "@/lib/chainlink-agent";
 import { getTriageContract } from "@/lib/contract";
-
+import { useAccount } from 'wagmi';
+import { useEthersSigner } from '@/lib/ethers-adapter';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 export default function QueuePage() {
-  // Wallet State
-  const [isConnected, setIsConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState("");
-  const [walletType, setWalletType] = useState<"smart" | "embedded" | "">("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalStep, setModalStep] = useState<"select" | "email" | "otp" | "connecting">("select");
-  const [emailInput, setEmailInput] = useState("");
-  const [otpInput, setOtpInput] = useState(["", "", "", "", "", ""]);
-  const [isConnectingWallet, setIsConnectingWallet] = useState(false);
+  const { isConnected, address: walletAddress } = useAccount();
+  const signer = useEthersSigner();
+  
   const [activeTab, setActiveTab] = useState<"clinic" | "triage" | "analytics" | "identity">("triage");
-
-  useEffect(() => {
-    const conn = localStorage.getItem("wallet_connected");
-    if (conn === "true") {
-      setIsConnected(true);
-      setWalletType((localStorage.getItem("wallet_type") as any) || "embedded");
-      setWalletAddress(localStorage.getItem("wallet_address") || "0x7482A1a12cd04547af575f4573c8caa1e94171a1");
-    } else {
-      window.location.href = "/";
-    }
-  }, []);
   
   // Triage / Queue State
   const [symptoms, setSymptoms] = useState("");
@@ -59,75 +44,11 @@ export default function QueuePage() {
     { id: "4", name: "Patient #2104", urgency: 42, status: "Triage Verified", timeWaiting: "22m", isMe: false },
   ]);
 
-  // Attempt real wallet connection if window.ethereum exists
-  const connectWeb3Wallet = async () => {
-    setIsConnectingWallet(true);
-    setModalStep("connecting");
-    
-    if (typeof window !== "undefined" && (window as any).ethereum) {
-      try {
-        const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
-        if (accounts.length > 0) {
-          setWalletAddress(accounts[0]);
-          setIsConnected(true);
-          setWalletType("smart");
-          setIsModalOpen(false);
-        }
-      } catch (error) {
-        console.error("Wallet connection rejected", error);
-        setIsConnectingWallet(false);
-        setModalStep("select");
-        return;
-      }
-    } else {
-      // Simulate smart wallet delay for demo fallback
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      connectMockWallet("smart");
-    }
-    setIsConnectingWallet(false);
-  };
-
-  const connectMockWallet = (type: "smart" | "embedded") => {
-    setIsConnected(true);
-    setWalletType(type);
-    setWalletAddress(
-      type === "smart" 
-        ? "0x4b791Ce943b7B9984b79A63725bF1cCe2fdf1964" 
-        : "0x7482A1a12cd04547af575f4573c8caa1e94171a1"
-    );
-    setIsModalOpen(false);
-  };
-
-  const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailInput) return;
-    setModalStep("otp");
-  };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (isNaN(Number(value))) return;
-    const newOtp = [...otpInput];
-    newOtp[index] = value.substring(value.length - 1);
-    setOtpInput(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
-    }
-
-    // If filled completely, simulate success
-    if (newOtp.every(val => val !== "")) {
-      setTimeout(() => {
-        connectMockWallet("embedded");
-      }, 1000);
-    }
-  };
 
   const handleTriageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isConnected) {
-      setIsModalOpen(true);
+      alert("Please connect your wallet first");
       return;
     }
     setIsSubmittingTriage(true);
@@ -144,9 +65,9 @@ export default function QueuePage() {
       let finalTxHash = result.zkProofRef;
 
       // Smart Contract Integration
-      if (walletType === "smart") {
+      if (signer) {
         try {
-          const contract = await getTriageContract();
+          const contract = await getTriageContract(signer);
           // Sending transaction to blockchain with mock ZK Proof and inputs
           const tx = await contract.createTicket(result.urgencyScore, result.zkProofRef, "0x00", []);
           await tx.wait(); // Wait for confirmation
@@ -157,6 +78,7 @@ export default function QueuePage() {
         } catch (error) {
           console.error("Smart contract execution failed, falling back to mock UI:", error);
           // If contract fails (e.g., user rejected), we fall back to mock just so the demo can continue
+          setMyTicketId(1);
         }
       } else {
         setMyTicketId(1);
@@ -197,9 +119,9 @@ export default function QueuePage() {
   };
 
   const acceptYieldOffer = async () => {
-    if (walletType === "smart" && myTicketId) {
+    if (signer && myTicketId) {
       try {
-        const contract = await getTriageContract();
+        const contract = await getTriageContract(signer);
         const crossChain = false; // By default, settle on the same chain for Hackathon Demo unless toggled
         const tx = await contract.acceptYieldOffer(myTicketId, crossChain);
         await tx.wait();
@@ -228,23 +150,6 @@ export default function QueuePage() {
 
     setHasYielded(true);
     setShowYieldOffer(false);
-  };
-
-  const disconnectWallet = () => {
-    localStorage.removeItem("wallet_connected");
-    localStorage.removeItem("wallet_type");
-    localStorage.removeItem("wallet_address");
-    setIsConnected(false);
-    setWalletAddress("");
-    setWalletType("");
-    setTriageStep("form");
-    setSymptoms("");
-    setPainLevel(5);
-    setIsWearableSynced(false);
-    setQueue(prev => prev.filter(p => !p.isMe));
-    setShowYieldOffer(false);
-    setHasYielded(false);
-    window.location.href = "/";
   };
 
   return (
@@ -282,48 +187,7 @@ export default function QueuePage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <AnimatePresence mode="wait">
-            {!isConnected ? (
-              <motion.button
-                key="connect-btn"
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                onClick={() => {
-                  setModalStep("select");
-                  setIsModalOpen(true);
-                }}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#BCD3E9] to-[#7482C4] text-[#112E64] font-semibold text-sm hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
-              >
-                <Wallet size={16} />
-                Connect Wallet
-              </motion.button>
-            ) : (
-              <motion.div
-                key="connected-info"
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-full px-4 py-2"
-              >
-                <div className="flex flex-col text-right hidden md:flex">
-                  <span className="text-[10px] uppercase tracking-wider text-white/50">Base Sepolia</span>
-                  <span className="text-xs font-mono font-medium">{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span>
-                </div>
-                <div className="h-8 w-[1px] bg-white/10 hidden md:block" />
-                <div className="flex items-center gap-2">
-                  <Coins size={14} className="text-[#BCD3E9]" />
-                  <span className="text-sm font-semibold">{balance.usdc} USDC</span>
-                </div>
-                <button
-                  onClick={disconnectWallet}
-                  className="p-1 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-white"
-                >
-                  <X size={16} />
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <ConnectButton />
         </div>
       </header>
 
@@ -816,34 +680,19 @@ export default function QueuePage() {
                             <div>
                               <p className="text-[10px] uppercase tracking-widest text-white/50 mb-1">Wallet Address</p>
                               <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between">
-                                <p className="text-sm font-mono text-[#BCD3E9]">{walletAddress.slice(0, 8)}...{walletAddress.slice(-6)}</p>
+                                <p className="text-sm font-mono text-[#BCD3E9]">{walletAddress?.slice(0, 8)}...{walletAddress?.slice(-6)}</p>
                                 <span className="text-[10px] bg-white/10 px-2 py-1 rounded text-white/60 uppercase tracking-wider">
-                                  {walletType === "smart" ? "Smart Wallet" : "Embedded"}
+                                  Web3 Wallet
                                 </span>
                               </div>
                             </div>
-
-                            <button 
-                              onClick={() => {
-                                setIsConnected(false);
-                                setWalletAddress("");
-                                setWalletType("");
-                                window.location.href = "/";
-                              }}
-                              className="w-full mt-4 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-xs uppercase tracking-wider transition-colors cursor-pointer"
-                            >
-                              Disconnect Session
-                            </button>
                           </div>
                         ) : (
                           <div className="text-center py-8 relative z-10">
                             <p className="text-sm text-white/50 mb-4">No wallet connected</p>
-                            <button 
-                              onClick={() => setIsModalOpen(true)}
-                              className="px-6 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-xs uppercase tracking-wider transition-all"
-                            >
-                              Connect Now
-                            </button>
+                            <div className="flex justify-center">
+                              <ConnectButton />
+                            </div>
                           </div>
                         )}
                       </div>
@@ -870,261 +719,6 @@ export default function QueuePage() {
           </AnimatePresence>
         </div>
       </main>
-
-      {/* MODAL: Connect Wallet Dialog */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Overlay backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-[#0c1833]/80 backdrop-blur-sm"
-            />
-
-            {/* Modal Box */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-md bg-[#112E64] border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden z-10"
-            >
-              {/* Grain background glow for modal */}
-              <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#7482C4]/20 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="flex justify-between items-center mb-6 relative">
-                <h3 className="font-serif text-2xl uppercase tracking-wide">Connect Wallet</h3>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="p-1 hover:bg-white/10 rounded-full transition-colors text-white/60 hover:text-white cursor-pointer"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <AnimatePresence mode="wait">
-                {modalStep === "select" && (
-                  <motion.div
-                    key="step-select"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="space-y-4"
-                  >
-                    <p className="text-xs text-white/50 mb-4 leading-relaxed">
-                      Select your preferred connection type. Embedded Wallets are perfect for non-crypto users, while Smart Wallets provide full on-chain control.
-                    </p>
-
-                    {/* OPTION A: Embedded Wallet (Google / Social) */}
-                    <div className="space-y-3">
-                      <p className="text-[10px] uppercase tracking-widest text-[#BCD3E9]/80 font-bold">Option 1: Embedded Wallet (Web2 Friendly)</p>
-                      
-                      <button
-                        onClick={() => setModalStep("email")}
-                        className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
-                            <Mail size={18} className="text-[#BCD3E9]" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold">Email / Social Passkey</p>
-                            <p className="text-[10px] text-white/40">No setup needed. Quick authentication</p>
-                          </div>
-                        </div>
-                        <ArrowRight size={16} className="text-white/60" />
-                      </button>
-
-                      <div className="grid grid-cols-3 gap-3">
-                        <button 
-                          onClick={() => connectMockWallet("embedded")}
-                          className="flex flex-col items-center justify-center p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer"
-                        >
-                          <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
-                            <path
-                              fill="#BCD3E9"
-                              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                            />
-                            <path
-                              fill="#BCD3E9"
-                              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                            />
-                            <path
-                              fill="#BCD3E9"
-                              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.87-2.6-2.87-4.53-6.16-4.53z"
-                            />
-                            <path
-                              fill="#BCD3E9"
-                              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                            />
-                          </svg>
-                          <span className="text-[10px] mt-2 font-semibold">Google</span>
-                        </button>
-                        <button 
-                          onClick={() => connectMockWallet("embedded")}
-                          className="flex flex-col items-center justify-center p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer"
-                        >
-                          <span className="text-sm font-bold text-[#BCD3E9]">𝕏</span>
-                          <span className="text-[10px] mt-2.5 font-semibold">Twitter</span>
-                        </button>
-                        <button 
-                          onClick={() => connectMockWallet("embedded")}
-                          className="flex flex-col items-center justify-center p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer"
-                        >
-                          <span className="text-xs font-semibold border border-[#BCD3E9] rounded-md px-1 text-[#BCD3E9]">Passkey</span>
-                          <span className="text-[10px] mt-2 font-semibold font-mono">FaceID</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="h-[1px] bg-white/10 my-4" />
-
-                    {/* OPTION B: Smart Wallet (MetaMask / Coinbase Smart Wallet) */}
-                    <div className="space-y-3">
-                      <p className="text-[10px] uppercase tracking-widest text-[#BCD3E9]/80 font-bold">Option 2: Browser & Smart Wallet (Web3 Pro)</p>
-
-                      <button
-                        onClick={connectWeb3Wallet}
-                        className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-[#BCD3E9]/10 to-[#7482C4]/10 border border-[#BCD3E9]/20 rounded-2xl hover:bg-white/10 transition-all text-left cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-[#BCD3E9]/20 flex items-center justify-center border border-[#BCD3E9]/30">
-                            <Wallet size={18} className="text-[#BCD3E9]" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-[#D5E8F0]">Coinbase Smart Wallet</p>
-                            <p className="text-[10px] text-[#BCD3E9]/70">Zero gas fees, secure smart contract wallet</p>
-                          </div>
-                        </div>
-                        <ArrowRight size={16} className="text-[#BCD3E9]" />
-                      </button>
-
-                      <button
-                        onClick={connectWeb3Wallet}
-                        className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all text-left cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-                            <span className="text-orange-400 text-lg font-bold">🦊</span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold">MetaMask / Extension</p>
-                            <p className="text-[10px] text-white/40">Connect via browser extension wallet</p>
-                          </div>
-                        </div>
-                        <ArrowRight size={16} className="text-white/60" />
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {modalStep === "email" && (
-                  <motion.div
-                    key="step-email"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                  >
-                    <form onSubmit={handleEmailSubmit} className="space-y-6">
-                      <div className="space-y-2">
-                        <label className="text-xs uppercase tracking-wider text-white/60">Enter Email Address</label>
-                        <input
-                          required
-                          type="email"
-                          value={emailInput}
-                          onChange={(e) => setEmailInput(e.target.value)}
-                          placeholder="e.g. physician@clinic.com"
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 outline-none text-white focus:border-[#BCD3E9] transition-all placeholder:text-white/30 text-sm"
-                        />
-                      </div>
-                      
-                      <div className="flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setModalStep("select")}
-                          className="flex-1 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-sm transition-all cursor-pointer"
-                        >
-                          Back
-                        </button>
-                        <button
-                          type="submit"
-                          className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-[#BCD3E9] to-[#7482C4] text-[#112E64] font-bold text-sm uppercase tracking-wider shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                        >
-                          Continue
-                        </button>
-                      </div>
-                    </form>
-                  </motion.div>
-                )}
-
-                {modalStep === "otp" && (
-                  <motion.div
-                    key="step-otp"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="space-y-6"
-                  >
-                    <div className="text-center space-y-2">
-                      <p className="text-sm text-white/80">We sent a verification code to</p>
-                      <p className="text-sm font-semibold text-[#BCD3E9] font-mono">{emailInput}</p>
-                    </div>
-
-                    <div className="flex justify-center gap-2">
-                      {otpInput.map((digit, index) => (
-                        <input
-                          key={index}
-                          id={`otp-${index}`}
-                          type="text"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(index, e.target.value)}
-                          className="w-12 h-14 bg-white/5 border border-white/10 rounded-xl text-center text-xl font-bold font-mono focus:border-[#BCD3E9] outline-none transition-all"
-                        />
-                      ))}
-                    </div>
-
-                    <div className="text-center">
-                      <button 
-                        type="button"
-                        onClick={() => setModalStep("email")}
-                        className="text-xs text-white/40 hover:text-white transition-colors"
-                      >
-                        Change Email Address
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {modalStep === "connecting" && (
-                  <motion.div
-                    key="step-connecting"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex flex-col items-center justify-center py-12 space-y-6"
-                  >
-                    <div className="relative w-16 h-16">
-                      <div className="absolute inset-0 rounded-full border-4 border-white/5" />
-                      <motion.div 
-                        animate={{ rotate: 360 }}
-                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                        className="absolute inset-0 rounded-full border-4 border-t-[#BCD3E9] border-r-transparent border-b-transparent border-l-transparent"
-                      />
-                    </div>
-                    <div className="text-center space-y-2">
-                      <p className="text-sm font-semibold">Connecting to Smart Wallet...</p>
-                      <p className="text-xs text-white/45">Accept the prompt in your wallet extension</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* SIMULATED TOAST POPUP: Yield Offer request */}
       <AnimatePresence>
