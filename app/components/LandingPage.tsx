@@ -309,11 +309,11 @@ export default function LandingPage() {
   const y = useTransform(heroScrollProgress, [0, 1], [0, 150]);
 
   const services = [
-    { num: "01", title: "RETIREMENT PLANNING", desc: "We help physicians retire not just comfortably, but with confidence." },
-    { num: "02", title: "INVESTMENT MANAGEMENT", desc: "A systematic approach to wealth. Your investments connect the rest of your financial life." },
-    { num: "03", title: "TAX PLANNING", desc: "Precision to minimize the pain. Every investment carries a cost, too often hidden in taxes." },
-    { num: "04", title: "INSURANCE", desc: "Helping you build immunity to uncertainty. Protect what you've earned." },
-    { num: "05", title: "LEGACY & ESTATE", desc: "From your future to theirs. Preserve your wealth with clarity and purpose." },
+    { num: "01", title: "AI-DRIVEN TRIAGE", desc: "Secure symptom analysis and biometric validation processed within a Confidential AI Trusted Execution Environment." },
+    { num: "02", title: "ZERO-KNOWLEDGE PRIVACY", desc: "Cryptographically verify patient urgency on-chain without revealing the underlying sensitive medical data." },
+    { num: "03", title: "PRIORITY YIELD QUEUES", desc: "Incentivize non-critical patients to yield their spot using automated, programmable stablecoin rewards." },
+    { num: "04", title: "CROSS-CHAIN SETTLEMENT", desc: "Seamlessly distribute USDC yield rewards across multiple blockchain networks using Chainlink CCIP." },
+    { num: "05", title: "VERIFIED HEALTH ORACLES", desc: "Prevent symptom exaggeration by corroborating inputs with verified wearable and biometric oracle data streams." },
   ];
 
   return (
@@ -415,7 +415,7 @@ export default function LandingPage() {
             transition={{ duration: 1.2, ease: "easeOut" }}
             className="font-serif text-[clamp(3rem,11vw,12rem)] leading-[0.9] tracking-tight uppercase heading-gradient w-full"
           >
-            Integrated<br />Wealthcare
+            Merior
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0 }}
@@ -423,7 +423,7 @@ export default function LandingPage() {
             transition={{ delay: 0.6, duration: 1 }}
             className="mt-8 text-xl md:text-3xl font-light tracking-wide max-w-2xl text-brand-accent/80"
           >
-            Collaborative Wealth Management<br />for the Medical Community
+            Privacy-Preserving AI Triage &<br />Priority Yield Queues
           </motion.p>
         </motion.div>
 
@@ -491,7 +491,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.4, ease: "easeOut" }}
                     >
                       <p className="text-3xl md:text-4xl lg:text-5xl font-light leading-relaxed text-brand-primary">
-                        Comprehensive wealth planning is a complex system, each part relies on the other to build an overall picture of financial health... that ensures you and your loved ones can enjoy your success for years to come.
+                        Physical queues are rigid, inefficient, and often dangerous. In emergency rooms and clinics, time is the most critical asset, yet it is allocated on a first-come, first-served basis rather than by true medical urgency.
                       </p>
                     </motion.div>
                   )}
@@ -505,9 +505,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.4, ease: "easeOut" }}
                       className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-brand-primary space-y-6"
                     >
-                      <p>As a medical professional, you've dedicated your life to others - often working long hours, making high-stakes decisions, and shouldering a profound responsibility.</p>
-                      <p>You operate with discipline, empathy, and precision.</p>
-                      <p>But in a profession that demands everything, who's ensuring your financial life is treated with the same care you offer your patients?</p>
+                      <p>Merior introduces programmatic empathy. By leveraging Confidential AI within a Trusted Execution Environment (TEE), we accurately analyze patient symptoms and biometric data off-chain to determine a verified urgency score without ever exposing sensitive health records.</p>
                     </motion.div>
                   )}
 
@@ -520,8 +518,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.4, ease: "easeOut" }}
                       className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-brand-primary space-y-6"
                     >
-                      <p>The IWC approach is built on fiduciary care, education, and long-term partnership - because your finances deserve the same attention you give to others.</p>
-                      <p>You've taken care of countless others. It's time someone returned the favor.</p>
+                      <p>Lower-priority patients are financially incentivized via stablecoin rewards to yield their spot to those in critical condition. It's a closed-loop system where urgency meets programmable economic incentives.</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -652,7 +649,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="font-serif text-5xl md:text-7xl leading-[1.05] mb-12 text-brand-primary uppercase"
             >
-              Risk can’t be eliminated, but it can be understood, measured, and aligned with your purpose.
+              Wait times shouldn't be fatal, and lines shouldn't be rigid.
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0 }}
@@ -661,7 +658,7 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="text-2xl mb-8 text-brand-primary/80 font-light"
             >
-              Beyond ordinary financial advising, we are your long-term wealth protection partners.
+              Beyond traditional triage, we introduce efficiency and compassion through decentralized technology.
             </motion.p>
             <motion.p 
               initial={{ opacity: 0 }}
@@ -670,7 +667,7 @@ export default function LandingPage() {
               transition={{ delay: 0.4 }}
               className="font-serif text-5xl mt-16 text-brand-primary uppercase"
             >
-              Family First. Always.
+              Care First. Always.
             </motion.p>
           </div>
         </div>
@@ -682,9 +679,9 @@ export default function LandingPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] bg-brand-secondary/5 blur-[100px] rounded-full pointer-events-none" />
         
         <div className="max-w-7xl mx-auto relative z-10 w-full">
-          <h2 className="text-sm uppercase tracking-[0.2em] mb-20 text-brand-accent/60">Solutions for Every Career Stage</h2>
+          <h2 className="text-sm uppercase tracking-[0.2em] mb-20 text-brand-accent/60">Solutions for Every Healthcare Facility</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {['Practice Owners & Trustees', 'Attending Physicians', 'Residents & Fellows', 'Program Coordinators', 'Medical Students'].map((title, i) => (
+            {['Urgent Care Clinics', 'Public Hospitals', 'Private Practices', 'Telehealth Providers', 'Emergency Rooms'].map((title, i) => (
               <motion.div 
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
@@ -745,10 +742,10 @@ export default function LandingPage() {
         </div>
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-20 w-full">
           <div>
-            <h2 className="font-serif text-[clamp(4rem,8vw,8rem)] leading-[0.8] mb-12 uppercase heading-gradient">Let's talk<br />about your<br />future</h2>
+            <h2 className="font-serif text-[clamp(4rem,8vw,8rem)] leading-[0.8] mb-12 uppercase heading-gradient">Transform<br />your clinic's<br />queue</h2>
             <div className="mt-24">
               <p className="text-sm uppercase tracking-widest text-brand-accent/60 mb-4">Contact Us</p>
-              <a href="mailto:admin@iwcglobal.net" className="text-3xl hover:text-brand-accent transition-colors block mb-2">admin@iwcglobal.net</a>
+              <a href="mailto:partner@merior.health" className="text-3xl hover:text-brand-accent transition-colors block mb-2">partner@merior.health</a>
               <p className="text-3xl font-light">866.694.6292</p>
             </div>
           </div>
@@ -765,16 +762,16 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="border-b border-brand-secondary/30 pb-4">
-                <label className="text-xs uppercase tracking-[0.2em] text-brand-accent/60 block mb-4">Career Stage *</label>
+                <label className="text-xs uppercase tracking-[0.2em] text-brand-accent/60 block mb-4">Facility Type *</label>
                 <select className="w-full bg-transparent outline-none text-2xl appearance-none text-brand-secondary">
-                  <option className="bg-[#12234A]">Practice Trustee</option>
-                  <option className="bg-[#12234A]">Attending Physician</option>
-                  <option className="bg-[#12234A]">Medical Student</option>
+                  <option className="bg-[#12234A]">Urgent Care</option>
+                  <option className="bg-[#12234A]">Hospital</option>
+                  <option className="bg-[#12234A]">Private Clinic</option>
                 </select>
               </div>
               <div className="border-b border-brand-secondary/30 pb-4">
-                <label className="text-xs uppercase tracking-[0.2em] text-brand-accent/60 block mb-4">Tell us a little about your story</label>
-                <textarea className="w-full bg-transparent outline-none text-xl resize-none h-16 placeholder:text-brand-secondary/20" placeholder="I would like to schedule a collaboration session..."></textarea>
+                <label className="text-xs uppercase tracking-[0.2em] text-brand-accent/60 block mb-4">Tell us a little about your facility</label>
+                <textarea className="w-full bg-transparent outline-none text-xl resize-none h-16 placeholder:text-brand-secondary/20" placeholder="I would like to integrate Merior into our triage workflow..."></textarea>
               </div>
               
               <button className="bg-brand-secondary text-brand-primary font-bold py-5 px-10 rounded-full self-start hover:bg-white transition-all hover:scale-105 uppercase tracking-widest text-sm mt-8">
