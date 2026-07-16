@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Wallet, Mail, ArrowRight, Shield, HeartPulse, 
   Activity, CheckCircle2, Coins, Lock, RefreshCw, X, AlertTriangle,
-  ListOrdered, BarChart2, UserCircle
+  ListOrdered, BarChart2, UserCircle, TrendingUp, Clock, ArrowUpRight, Settings, Key, Fingerprint, History
 } from "lucide-react";
 import Grainient from "@/components/Grainient";
 import { executeConfidentialTriage } from "@/lib/chainlink-agent";
@@ -662,13 +662,86 @@ export default function QueuePage() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="max-w-3xl glass-panel rounded-3xl p-8 shadow-2xl min-h-[70vh] flex flex-col items-center justify-center text-center"
+                className="max-w-4xl"
               >
-                <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 mb-6">
-                  <BarChart2 className="w-10 h-10 text-[#BCD3E9]" />
-                </div>
-                <h2 className="font-serif text-3xl text-[#D5E8F0] uppercase tracking-wide">Yield Analytics</h2>
-                <p className="text-white/50 mt-4 max-w-md">Detailed breakdown of total USDC earned, system-wide queue efficiency, and top yielding patients will be displayed here.</p>
+                <section className="glass-panel rounded-3xl p-6 md:p-8 shadow-2xl min-h-[70vh] relative overflow-hidden">
+                  {/* Decorative background glow */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#BCD3E9]/5 to-transparent rounded-bl-full pointer-events-none" />
+                  
+                  <div className="flex items-center gap-2 mb-8">
+                    <BarChart2 className="text-[#BCD3E9] w-5 h-5" />
+                    <span className="text-xs uppercase tracking-[0.2em] text-[#BCD3E9]/80 font-semibold">System Yield Analytics</span>
+                  </div>
+
+                  {/* Top Stats Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden hover:bg-white/10 transition-colors">
+                      <div className="absolute -right-4 -bottom-4 opacity-5">
+                        <Coins size={100} />
+                      </div>
+                      <p className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Total USDC Distributed</p>
+                      <p className="text-3xl font-bold text-[#D5E8F0] font-mono">$1,450.00</p>
+                      <div className="flex items-center gap-1 text-emerald-400 mt-2">
+                        <TrendingUp size={12} />
+                        <span className="text-xs font-mono">+12% this week</span>
+                      </div>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-5 relative overflow-hidden hover:bg-white/10 transition-colors">
+                      <div className="absolute -right-4 -bottom-4 opacity-5">
+                        <Activity size={100} />
+                      </div>
+                      <p className="text-[10px] uppercase tracking-widest text-white/50 mb-2">Spots Yielded</p>
+                      <p className="text-3xl font-bold text-[#D5E8F0] font-mono">142</p>
+                      <div className="flex items-center gap-1 text-emerald-400 mt-2">
+                        <TrendingUp size={12} />
+                        <span className="text-xs font-mono">High liquidity</span>
+                      </div>
+                    </div>
+                    <div className="bg-[#BCD3E9]/10 border border-[#BCD3E9]/20 rounded-2xl p-5 relative overflow-hidden">
+                      <div className="absolute -right-4 -bottom-4 opacity-10">
+                        <Clock size={100} />
+                      </div>
+                      <p className="text-[10px] uppercase tracking-widest text-[#BCD3E9]/70 mb-2 font-bold">Avg Wait Time Saved</p>
+                      <p className="text-3xl font-bold text-[#BCD3E9] font-mono">42m</p>
+                      <p className="text-xs text-[#BCD3E9]/60 mt-2 font-mono">Per critical patient</p>
+                    </div>
+                  </div>
+
+                  {/* Recent Yield Activity */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <History size={16} /> Recent Yield Transactions
+                    </h3>
+                    <div className="space-y-3">
+                      {[
+                        { time: "2 mins ago", amount: "+ 15.00 USDC", to: "0x3f...9a12", type: "Yielded to Urgency Level 85" },
+                        { time: "14 mins ago", amount: "+ 10.00 USDC", to: "0x7b...4c21", type: "Yielded to Urgency Level 92" },
+                        { time: "1 hour ago", amount: "+ 25.00 USDC", to: "0x9a...1f44", type: "Yielded to Urgency Level 98" },
+                        { time: "3 hours ago", amount: "+ 5.00 USDC", to: "0x1c...8b99", type: "Yielded to Urgency Level 74" }
+                      ].map((tx, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors cursor-default">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                              <ArrowUpRight size={16} className="text-emerald-400" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-[#D5E8F0]">{tx.type}</p>
+                              <div className="flex items-center gap-2 text-[10px] text-white/40 mt-1 font-mono">
+                                <span>{tx.time}</span>
+                                <span>•</span>
+                                <span>Tx: {tx.to}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-emerald-400 font-mono">{tx.amount}</p>
+                            <p className="text-[10px] text-white/30 uppercase tracking-widest mt-1">Settled</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
               </motion.div>
             )}
 
@@ -678,13 +751,119 @@ export default function QueuePage() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="max-w-3xl glass-panel rounded-3xl p-8 shadow-2xl min-h-[70vh] flex flex-col items-center justify-center text-center"
+                className="max-w-4xl"
               >
-                <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 mb-6">
-                  <UserCircle className="w-10 h-10 text-[#BCD3E9]" />
-                </div>
-                <h2 className="font-serif text-3xl text-[#D5E8F0] uppercase tracking-wide">Identity & Wallet</h2>
-                <p className="text-white/50 mt-4 max-w-md">Your ZK-Health Identity configuration, paired embedded wallet controls, and on-chain connection settings will live here.</p>
+                <section className="glass-panel rounded-3xl p-6 md:p-8 shadow-2xl min-h-[70vh]">
+                  <div className="flex items-center gap-2 mb-8">
+                    <UserCircle className="text-[#BCD3E9] w-5 h-5" />
+                    <span className="text-xs uppercase tracking-[0.2em] text-[#BCD3E9]/80 font-semibold">Identity & Wallet Settings</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left Column: ZK Profile */}
+                    <div className="space-y-6">
+                      <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#BCD3E9] to-[#7482C4] flex items-center justify-center mb-4 shadow-lg shadow-[#BCD3E9]/20">
+                          <Fingerprint size={32} className="text-[#112E64]" />
+                        </div>
+                        <h3 className="font-serif text-2xl text-[#D5E8F0] mb-1">ZK-Health Profile</h3>
+                        <p className="text-xs text-white/50 leading-relaxed mb-6">
+                          Your medical history is encrypted and stored locally. Only cryptographic proofs of your triage state are published on-chain.
+                        </p>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                            <span className="text-xs text-white/60 uppercase tracking-wider">Status</span>
+                            <div className="flex items-center gap-1.5 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                              <CheckCircle2 size={12} className="text-emerald-400" />
+                              <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Verified</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                            <span className="text-xs text-white/60 uppercase tracking-wider">Identity Hash</span>
+                            <span className="text-xs font-mono text-white/80">0x88f...3a9c</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                            <span className="text-xs text-white/60 uppercase tracking-wider">Last Sync</span>
+                            <span className="text-xs text-white/80">Today, 09:41 AM</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Wallet Config */}
+                    <div className="space-y-6">
+                      <div className="bg-gradient-to-br from-[#112E64] to-[#0c1833] border border-white/10 rounded-3xl p-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                          <Wallet size={120} />
+                        </div>
+                        
+                        <h3 className="font-serif text-xl text-[#D5E8F0] mb-6 flex items-center gap-2">
+                          <Key size={18} className="text-[#BCD3E9]" /> Connected Wallet
+                        </h3>
+                        
+                        {isConnected ? (
+                          <div className="space-y-4 relative z-10">
+                            <div>
+                              <p className="text-[10px] uppercase tracking-widest text-white/50 mb-1">Network</p>
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                <p className="text-sm font-semibold text-white">Ethereum Sepolia</p>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <p className="text-[10px] uppercase tracking-widest text-white/50 mb-1">Wallet Address</p>
+                              <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between">
+                                <p className="text-sm font-mono text-[#BCD3E9]">{walletAddress.slice(0, 8)}...{walletAddress.slice(-6)}</p>
+                                <span className="text-[10px] bg-white/10 px-2 py-1 rounded text-white/60 uppercase tracking-wider">
+                                  {walletType === "smart" ? "Smart Wallet" : "Embedded"}
+                                </span>
+                              </div>
+                            </div>
+
+                            <button 
+                              onClick={() => {
+                                setIsConnected(false);
+                                setWalletAddress("");
+                                setWalletType("");
+                                window.location.href = "/";
+                              }}
+                              className="w-full mt-4 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                            >
+                              Disconnect Session
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 relative z-10">
+                            <p className="text-sm text-white/50 mb-4">No wallet connected</p>
+                            <button 
+                              onClick={() => setIsModalOpen(true)}
+                              className="px-6 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-xs uppercase tracking-wider transition-all"
+                            >
+                              Connect Now
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
+                        <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-4 flex items-center gap-2">
+                          <Settings size={16} /> Preferences
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-[#D5E8F0]">Auto-Accept High Yields</p>
+                            <p className="text-[10px] text-white/40 mt-1">Automatically yield if offer is &gt; 20 USDC</p>
+                          </div>
+                          <div className="w-10 h-6 bg-[#BCD3E9] rounded-full relative cursor-pointer shadow-[0_0_10px_rgba(188,211,233,0.3)]">
+                            <div className="absolute right-1 top-1 w-4 h-4 bg-[#112E64] rounded-full" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
               </motion.div>
             )}
           </AnimatePresence>
