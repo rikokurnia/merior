@@ -248,7 +248,7 @@ export default function LandingPage() {
           <div className="container mx-auto px-6 md:px-20 z-10 w-full h-full flex items-center justify-end relative">
             
             {/* Static PPT Display Container (Absolute positioned, behind the scroll container) */}
-            <div className="absolute right-6 md:right-20 top-1/2 -translate-y-1/2 w-[90%] md:w-1/2 h-[60vh] flex flex-col justify-between pointer-events-none select-none z-10">
+            <div className="absolute right-6 md:right-20 top-1/2 -translate-y-1/2 w-full max-w-[90%] md:max-w-[55%] h-[60vh] flex flex-col justify-between pointer-events-none select-none z-10">
               <div className="h-[45vh] flex items-center relative">
                 <AnimatePresence mode="wait">
                   {activeIntroSlide === 0 && (
@@ -259,7 +259,7 @@ export default function LandingPage() {
                       exit={{ opacity: 0, y: -15 }}
                       transition={{ duration: 0.4, ease: "easeOut" }}
                     >
-                      <p className="text-3xl md:text-4xl lg:text-5xl font-light leading-relaxed text-brand-primary">
+                      <p className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed text-brand-primary">
                         Physical queues are rigid, inefficient, and often dangerous. In emergency rooms and clinics, time is the most critical asset, yet it is allocated on a first-come, first-served basis rather than by true medical urgency.
                       </p>
                     </motion.div>
@@ -272,7 +272,7 @@ export default function LandingPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -15 }}
                       transition={{ duration: 0.4, ease: "easeOut" }}
-                      className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-brand-primary space-y-6"
+                      className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed text-brand-primary space-y-6"
                     >
                       <p>Merior introduces programmatic empathy. By leveraging Confidential AI within a Trusted Execution Environment (TEE), we accurately analyze patient symptoms and biometric data off-chain to determine a verified urgency score without ever exposing sensitive health records.</p>
                     </motion.div>
@@ -285,7 +285,7 @@ export default function LandingPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -15 }}
                       transition={{ duration: 0.4, ease: "easeOut" }}
-                      className="text-2xl md:text-3xl lg:text-4xl font-light leading-relaxed text-brand-primary space-y-6"
+                      className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed text-brand-primary space-y-6"
                     >
                       <p>Lower-priority patients are financially incentivized via stablecoin rewards to yield their spot to those in critical condition. It's a closed-loop system where urgency meets programmable economic incentives.</p>
                     </motion.div>
@@ -350,8 +350,8 @@ export default function LandingPage() {
             />
           </div>
           
-          <div className="container mx-auto px-6 md:px-20 z-10 w-full h-full flex items-center justify-end">
-            <div className="w-full md:w-3/5 h-[60vh] overflow-hidden relative">
+          <div className="container mx-auto px-6 md:px-20 z-10 w-full h-full flex items-center justify-center">
+            <div className="w-full max-w-4xl h-[60vh] px-6 overflow-hidden relative">
               <motion.div
                 animate={{ y: `calc(10vh - ${activeService * 60}vh)` }}
                 transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -367,15 +367,15 @@ export default function LandingPage() {
                         scale: isActive ? 1.02 : 0.95,
                       }}
                       transition={{ duration: 0.5 }}
-                      className="h-[60vh] flex flex-col justify-center"
+                      className="h-[60vh] flex flex-col justify-center pl-4"
                     >
-                      <span className="font-sans text-xl tracking-[0.2em] text-brand-accent/40 mb-6">
+                      <span className="font-sans text-xl md:text-2xl tracking-[0.25em] text-brand-accent mb-4">
                         {service.num}
                       </span>
-                      <h3 className="font-serif text-5xl md:text-8xl mb-8 leading-[0.9] uppercase heading-gradient">
+                      <h3 className="font-serif text-4xl md:text-6xl lg:text-7xl mb-6 leading-[1.1] uppercase heading-gradient">
                         {service.title}
                       </h3>
-                      <p className="text-2xl text-brand-accent/70 font-light max-w-xl leading-relaxed">
+                      <p className="text-xl md:text-2xl text-white/95 font-light max-w-3xl leading-relaxed">
                         {service.desc}
                       </p>
                     </motion.div>
