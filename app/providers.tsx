@@ -13,7 +13,7 @@ import { sepolia } from 'wagmi/chains';
 
 const config = getDefaultConfig({
   appName: 'Merior',
-  projectId: 'a059d6e408ecbbdcfba61ff79c8ab666', // public shared project ID for demos
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'a059d6e408ecbbdcfba61ff79c8ab666',
   chains: [sepolia],
   ssr: true,
 });
