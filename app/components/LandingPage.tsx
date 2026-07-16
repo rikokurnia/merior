@@ -403,20 +403,20 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="aspect-square max-h-[30vh] md:max-h-none bg-[#B0CBE0] rounded-2xl overflow-hidden relative"
+            className="aspect-square max-h-[30vh] md:max-h-none rounded-2xl overflow-hidden relative"
           >
-             {/* Abstract organic shape in place of family illustration */}
-             <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-4/5 h-4/5 bg-brand-primary/15 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] animate-[spin_15s_linear_infinite] mix-blend-multiply blur-2xl" />
-                <div className="absolute w-3/5 h-3/5 bg-brand-primary/20 rounded-[60%_40%_30%_70%/60%_30%_70%_40%] animate-[spin_10s_linear_infinite_reverse] mix-blend-multiply blur-3xl" />
-             </div>
+             <img 
+               src="/images/hospital.jpeg" 
+               alt="Hospital Facility" 
+               className="w-full h-full object-cover"
+             />
           </motion.div>
           <div>
             <motion.h2 
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="font-serif text-5xl md:text-7xl leading-[1.05] mb-12 text-brand-primary uppercase"
+              className="font-serif text-3xl md:text-5xl lg:text-6xl leading-[1.05] mb-6 text-brand-primary uppercase"
             >
               Wait times shouldn't be fatal, and lines shouldn't be rigid.
             </motion.h2>
@@ -425,7 +425,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-2xl mb-8 text-brand-primary/80 font-light"
+              className="text-lg md:text-xl mb-6 text-brand-primary/80 font-light"
             >
               Beyond traditional triage, we introduce efficiency and compassion through decentralized technology.
             </motion.p>
@@ -434,7 +434,7 @@ export default function LandingPage() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
-              className="font-serif text-5xl mt-16 text-brand-primary uppercase"
+              className="font-serif text-2xl md:text-3xl mt-8 text-brand-primary uppercase"
             >
               Care First. Always.
             </motion.p>
