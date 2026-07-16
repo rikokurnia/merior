@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Grainient from "@/components/Grainient";
 import { executeConfidentialTriage } from "@/lib/chainlink-agent";
+import { getTriageContract } from "@/lib/contract";
 
 
 export default function QueuePage() {
@@ -43,6 +44,7 @@ export default function QueuePage() {
   const [generatedScore, setGeneratedScore] = useState(0);
   const [zkProofHash, setZkProofHash] = useState("");
   const [attestationReason, setAttestationReason] = useState("");
+  const [myTicketId, setMyTicketId] = useState<number | null>(null);
   
   // Yield Mechanism Mock states
   const [showYieldOffer, setShowYieldOffer] = useState(false);
@@ -139,8 +141,29 @@ export default function QueuePage() {
         isWearableSynced
       );
 
+      let finalTxHash = result.zkProofRef;
+
+      // Smart Contract Integration
+      if (walletType === "smart") {
+        try {
+          const contract = await getTriageContract();
+          // Sending transaction to blockchain
+          const tx = await contract.createTicket(result.urgencyScore, result.zkProofRef);
+          await tx.wait(); // Wait for confirmation
+          finalTxHash = tx.hash;
+          // In a real app we'd parse the event to get the actual Ticket ID. 
+          // For now we mock it as ticket ID 1.
+          setMyTicketId(1);
+        } catch (error) {
+          console.error("Smart contract execution failed, falling back to mock UI:", error);
+          // If contract fails (e.g., user rejected), we fall back to mock just so the demo can continue
+        }
+      } else {
+        setMyTicketId(1);
+      }
+
       setGeneratedScore(result.urgencyScore);
-      setZkProofHash(result.zkProofRef);
+      setZkProofHash(finalTxHash);
       setAttestationReason(result.reason);
       setTriageStep("success");
 
@@ -173,7 +196,19 @@ export default function QueuePage() {
     }
   };
 
-  const acceptYieldOffer = () => {
+  const acceptYieldOffer = async () => {
+    if (walletType === "smart" && myTicketId) {
+      try {
+        const contract = await getTriageContract();
+        const tx = await contract.acceptYieldOffer(myTicketId);
+        await tx.wait();
+      } catch (error) {
+        console.error("Yield offer transaction failed:", error);
+        alert("Transaction failed or was rejected.");
+        return; // Stop execution if tx fails
+      }
+    }
+
     // Perform yield logic: move patient down, give USDC reward
     setQueue(prev => {
       const updated = prev.map(p => {
