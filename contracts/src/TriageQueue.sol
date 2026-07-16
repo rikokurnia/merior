@@ -5,7 +5,33 @@ interface IERC20 {
     function transfer(address to, uint256 value) external returns (bool);
     function transferFrom(address from, address to, uint256 value) external returns (bool);
     function balanceOf(address account) external view returns (uint256);
+    function approve(address spender, uint256 value) external returns (bool);
 }
+
+// CCIP Router Interface for Cross-Chain Rewards
+interface IRouterClient {
+    function ccipSend(uint64 destinationChainSelector, Client.EVM2AnyMessage calldata message) external payable returns (bytes32);
+}
+
+library Client {
+    struct EVMTokenAmount {
+        address token;
+        uint256 amount;
+    }
+    struct EVM2AnyMessage {
+        bytes receiver;
+        bytes data;
+        EVMTokenAmount[] tokenAmounts;
+        address feeToken;
+        bytes extraArgs;
+    }
+}
+
+// zkVerify Proof Interface
+interface IZkVerify {
+    function verifyProof(uint256[] memory publicInputs, bytes memory proof) external view returns (bool);
+}
+
 
 contract TriageQueue {
     struct Ticket {
@@ -36,6 +62,11 @@ contract TriageQueue {
     mapping(uint256 => Ticket) public tickets;
     mapping(uint256 => YieldOffer) public activeOffers;
 
+    // Phase 4: Integrations State
+    IRouterClient public ccipRouter;
+    IZkVerify public zkVerifier;
+    uint64 public destinationChainSelector; // ID for target chain (e.g. Base)
+
     // Events
     event TicketCreated(uint256 indexed ticketId, address indexed owner, uint256 triageScore);
     event YieldOfferCreated(uint256 indexed ticketId, uint256 offerAmount, uint256 scoreReduction);
@@ -60,15 +91,27 @@ contract TriageQueue {
         nextTicketId = 1;
     }
 
+    // --- Phase 4 Setup ---
+    function setIntegrations(address _ccipRouter, address _zkVerifier, uint64 _chainSelector) external onlyOwner {
+        ccipRouter = IRouterClient(_ccipRouter);
+        zkVerifier = IZkVerify(_zkVerifier);
+        destinationChainSelector = _chainSelector;
+    }
+
     // --- Core Patient Actions ---
 
     /**
      * @notice Submit a new ZK-verified triage ticket and place it in the sorted queue.
      * @param triageScore Urgency score calculated from patient symptoms and vitals (1-99).
-     * @param zkProof Zero-knowledge proof verification CID / transaction hash.
+     * @param zkProofCID Zero-knowledge proof verification CID / transaction hash.
      */
-    function createTicket(uint256 triageScore, string calldata zkProof) external returns (uint256) {
+    function createTicket(uint256 triageScore, string calldata zkProofCID, bytes memory actualProof, uint256[] memory publicInputs) external returns (uint256) {
         require(triageScore > 0 && triageScore <= 100, "TriageQueue: score must be between 1 and 100");
+        
+        // zkVerify Check: Ensure the patient's triage score is mathematically verified before queueing
+        if (address(zkVerifier) != address(0) && actualProof.length > 0) {
+            require(zkVerifier.verifyProof(publicInputs, actualProof), "TriageQueue: Invalid ZK Proof of Triage");
+        }
         
         uint256 ticketId = nextTicketId++;
         tickets[ticketId] = Ticket({
@@ -76,7 +119,7 @@ contract TriageQueue {
             owner: msg.sender,
             triageScore: triageScore,
             timestamp: block.timestamp,
-            zkProof: zkProof,
+            zkProof: zkProofCID, // Keep CID string for frontend / IPFS indexing
             isOracleVerified: false,
             exists: true
         });
@@ -91,7 +134,7 @@ contract TriageQueue {
      * @notice Accept a pending yield offer, lowering queue priority in exchange for a stablecoin refund.
      * @param ticketId The ID of the ticket.
      */
-    function acceptYieldOffer(uint256 ticketId) external {
+    function acceptYieldOffer(uint256 ticketId, bool crossChain) external {
         Ticket storage ticket = tickets[ticketId];
         require(ticket.exists, "TriageQueue: ticket does not exist");
         require(ticket.owner == msg.sender, "TriageQueue: caller is not the ticket owner");
@@ -101,7 +144,29 @@ contract TriageQueue {
 
         // Pay out USDC reward to patient
         require(usdcToken.balanceOf(address(this)) >= offer.offerAmount, "TriageQueue: insufficient contract reward balance");
-        usdcToken.transfer(msg.sender, offer.offerAmount);
+        
+        if (crossChain && address(ccipRouter) != address(0)) {
+            // Send USDC Cross-Chain via CCIP (e.g., from Sepolia to Base Sepolia)
+            Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
+            tokenAmounts[0] = Client.EVMTokenAmount({
+                token: address(usdcToken),
+                amount: offer.offerAmount
+            });
+
+            Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
+                receiver: abi.encode(msg.sender),
+                data: "",
+                tokenAmounts: tokenAmounts,
+                feeToken: address(0),
+                extraArgs: ""
+            });
+
+            usdcToken.approve(address(ccipRouter), offer.offerAmount);
+            ccipRouter.ccipSend(destinationChainSelector, message);
+        } else {
+            // Settle on the same chain
+            usdcToken.transfer(msg.sender, offer.offerAmount);
+        }
 
         // Adjust queue score and re-sort
         uint256 originalScore = ticket.triageScore;

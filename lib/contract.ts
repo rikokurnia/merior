@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
 
 export const TRIAGE_QUEUE_ABI = [
-  "function createTicket(uint256 triageScore, string zkProof) external returns (uint256)",
-  "function acceptYieldOffer(uint256 ticketId) external",
+  "function createTicket(uint256 triageScore, string zkProofCID, bytes actualProof, uint256[] publicInputs) external returns (uint256)",
+  "function acceptYieldOffer(uint256 ticketId, bool crossChain) external",
   "function getActiveQueue() external view returns (uint256[])",
   "function tickets(uint256) external view returns (uint256 id, address owner, uint256 triageScore, uint256 timestamp, string zkProof, bool isOracleVerified, bool exists)",
   "function activeOffers(uint256) external view returns (uint256 ticketId, uint256 offerAmount, uint256 scoreReduction, bool exists)",

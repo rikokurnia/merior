@@ -147,8 +147,8 @@ export default function QueuePage() {
       if (walletType === "smart") {
         try {
           const contract = await getTriageContract();
-          // Sending transaction to blockchain
-          const tx = await contract.createTicket(result.urgencyScore, result.zkProofRef);
+          // Sending transaction to blockchain with mock ZK Proof and inputs
+          const tx = await contract.createTicket(result.urgencyScore, result.zkProofRef, "0x00", []);
           await tx.wait(); // Wait for confirmation
           finalTxHash = tx.hash;
           // In a real app we'd parse the event to get the actual Ticket ID. 
@@ -200,7 +200,8 @@ export default function QueuePage() {
     if (walletType === "smart" && myTicketId) {
       try {
         const contract = await getTriageContract();
-        const tx = await contract.acceptYieldOffer(myTicketId);
+        const crossChain = false; // By default, settle on the same chain for Hackathon Demo unless toggled
+        const tx = await contract.acceptYieldOffer(myTicketId, crossChain);
         await tx.wait();
       } catch (error) {
         console.error("Yield offer transaction failed:", error);

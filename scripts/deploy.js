@@ -69,7 +69,7 @@ async function main() {
     }
 
     const keys = Object.keys(output.contracts[fileName]);
-    const contractName = keys.find(k => k !== "IERC20") || keys[0];
+    const contractName = keys.find(k => k === "TriageQueue" || k === "MockUSDC") || keys[0];
     const contract = output.contracts[fileName][contractName];
     return {
       abi: contract.abi,
