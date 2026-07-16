@@ -223,9 +223,11 @@ export default function LandingPage() {
           return;
         }
       } catch (error) {
-        console.error("Wallet connection rejected", error);
+        console.warn("Wallet connection rejected or pending. Falling back to Demo Mode...", error);
+        // Fallback for hackathon demo if wallet throws an error
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        connectWallet("smart");
         setIsConnecting(false);
-        setModalStep("select");
         return;
       }
     } else {
